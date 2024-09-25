@@ -4,7 +4,7 @@ const { generateResponse } = require("../services/openaiService");
 const { analyzeResponse } = require("../utils/responseUtils");
 const {
   getCreativeScenario,
-  generateResponseWithTone,
+  generateConversationalResponse,
 } = require("../services/scenarioService");
 const scenarioCategories = require("../scenarios/scenarioCategories");
 const { inferSeverityLevel } = require("../services/openaiService");
@@ -61,7 +61,7 @@ router.post("/respond", async (req, res) => {
 
     const inferredSeverityLevel = await inferSeverityLevel(conversationHistory);
 
-    const systemResponse = await generateResponseWithTone(
+    const systemResponse = await generateConversationalResponse(
       conversationHistory,
       inferredSeverityLevel
     );
@@ -118,11 +118,23 @@ router.post("/finish", (req, res) => {
     )
     .join("\n");
 
-  const feedbackPrompt = `Provide an analysis of the following conversation in terms of creativity, fluency, adaptability, and overall communication effectiveness:\n\n${conversationHistory}`;
+  const feedbackPrompt = `
+    Please analyze the following conversation, providing feedback in a structured format with the following sections:
+    
+    1. **Feedback**: Provide a general overview of how the conversation went, focusing on creativity, fluency, adaptability, and overall communication effectiveness.
+    2. **Points to Improve**: Highlight specific areas where the user can improve their responses, communication style, or content.
+    3. **Tone Corrections**: Identify any instances where the tone was inappropriate, inconsistent, or could be improved to sound more natural or appropriate for the situation.
+    4. **Typos**: List any spelling or grammatical errors found in the user's responses.
+
+    Conversation history:
+    ${conversationHistory}
+    
+    Provide the structured feedback now:
+  `;
 
   generateResponse(feedbackPrompt)
-    .then((feedback) => {
-      res.json({ feedback });
+    .then((structuredFeedback) => {
+      res.json({ structuredFeedback });
 
       delete userSessions[candidateId];
     })
