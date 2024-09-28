@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { generateResponse } = require("../services/openaiService");
+const { generateResponse, transcribe } = require("../services/openaiService");
 const { analyzeResponse } = require("../utils/responseUtils");
 const {
   getCreativeScenario,
@@ -8,6 +8,7 @@ const {
 } = require("../services/scenarioService");
 const scenarioCategories = require("../scenarios/scenarioCategories");
 const { inferSeverityLevel } = require("../services/openaiService");
+const { upload } = require("../middleware/upload");
 
 let userSessions = {};
 
@@ -37,7 +38,7 @@ router.post("/start", async (req, res) => {
   }
 });
 
-router.post("/respond", async (req, res) => {
+router.post("/respond", upload.single("audio"), async (req, res) => {
   const { candidateId, userMessage } = req.body;
 
   if (!userSessions[candidateId]) {
@@ -45,9 +46,23 @@ router.post("/respond", async (req, res) => {
   }
 
   try {
+    let userInputMessage = userMessage;
+
+    if (req.file) {
+      try {
+        userInputMessage = await transcribe(req.file);
+        console.log("userInputMessage", userInputMessage);
+      } catch (error) {
+        console.error("Error transcribing audio:", error);
+        return res
+          .status(500)
+          .json({ error: "Failed to transcribe the audio file" });
+      }
+    }
+
     userSessions[candidateId].interactions.push({
       role: "user",
-      message: userMessage,
+      message: userInputMessage,
     });
 
     const conversationHistory = userSessions[candidateId].interactions
