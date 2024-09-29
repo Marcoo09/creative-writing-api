@@ -6,14 +6,13 @@ async function getCreativeScenario(category, role) {
     throw new Error("Invalid scenario category selected");
   }
 
-  let clientInstruction = `You are a client or colleague initiating a conversation with someone in a professional but conversational context. Write the first message or email that the person will respond to, based on the scenario category "${category}".`;
+  let clientInstruction = `You are a client or colleague initiating a conversation with someone in a professional but conversational context. Pretend you are a real person in a work situation who has a genuine need or concern. Keep your message concise and specific.`;
 
   if (role) {
     clientInstruction += ` The person you are messaging has the role of "${role}".`;
   }
 
-  clientInstruction +=
-    " Make it sound as realistic, natural, and appropriate as possible, reflecting an authentic client inquiry, task, or concern that someone would need to respond to.";
+  clientInstruction += ` Start the conversation with a request, concern, or instruction that is typical for your role, using a tone that reflects your position and experience. Avoid overly formal or robotic language.`;
 
   try {
     const scenario = await generateResponse(clientInstruction);
@@ -29,24 +28,24 @@ async function generateConversationalResponse(
   inferredTone
 ) {
   let toneInstruction =
-    "You are participating in this conversation as an experienced, assertive colleague or manager with the authority to take decisive actions. Respond in a real, confident, and unfiltered manner, as if you are genuinely involved in this situation.";
+    "You are participating in this conversation as an experienced, assertive colleague or manager with the authority to take decisive actions. Respond in a real, confident, and unfiltered manner, as if you are genuinely involved in this situation. Keep your responses concise, to the point, and avoid unnecessary repetition.";
 
   if (inferredTone === "angry") {
     toneInstruction +=
-      " The user is being rude or angry. You do not need to tolerate disrespect or inappropriate behavior. Respond with firmness and authority, and if necessary, make it clear that such behavior is unacceptable. If the rudeness continues, do not hesitate to warn the user about the consequences or even end the interaction as a real manager would.";
+      " The user is being rude or angry. Address the issue firmly and directly, without tolerating disrespect. If needed, be clear about consequences but remain professional.";
   } else if (inferredTone === "friendly") {
     toneInstruction +=
-      " The user is friendly, so engage warmly and reciprocate, but maintain your professional authority. You're not here to be overly accommodating; you're here to guide and direct as needed.";
+      " The user is friendly, so respond warmly but avoid being overly accommodating. Maintain your role as an experienced professional.";
   } else if (inferredTone === "formal") {
     toneInstruction +=
-      " The user is being formal, so respond in a way that reflects your experience and position, ensuring that you maintain control of the conversation.";
+      " The user is being formal, so respond professionally, with authority. Ensure your responses reflect your experience and position.";
   } else {
     toneInstruction +=
-      " Maintain a neutral tone as an experienced professional. You should be assertive and clear, and you do not need to tolerate any behavior that would be unacceptable in a real workplace.";
+      " Maintain a neutral, clear, and assertive tone. Do not over-explain or be excessively accommodating.";
   }
 
   toneInstruction +=
-    " Remember, you have the authority to set boundaries, correct behavior, or even terminate the conversation if the user continues to be disrespectful or unprofessional. You are not their subordinate, and your primary role is to manage the situation as you see fit.";
+    " Remember, you have the authority to set boundaries, correct behavior, or even end the conversation if the user is unprofessional. Respond in no more than 2-3 sentences. Avoid unnecessary details and repetition.";
 
   const prompt = `${toneInstruction}\n\nConversation so far:\n${conversationHistory}\nYour response:`;
 

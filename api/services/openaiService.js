@@ -8,7 +8,7 @@ const openai = new OpenAI({
 
 async function inferSeverityLevel(conversationHistory) {
   const prompt = `
-      Analyze the following conversation and determine the tone and emotion conveyed by the user in the latest message. Respond with one of the following categories: "neutral", "formal", "angry", or "friendly". 
+      Analyze the following conversation and determine the tone and emotion conveyed by the user in the latest message. Respond with one of the following categories: "neutral", "formal", "angry", or "friendly". Be as realistic and accurate as possible; do not exaggerate the tone.
   
       Conversation history:
       ${conversationHistory}

@@ -96,30 +96,6 @@ router.post("/respond", upload.single("audio"), async (req, res) => {
   }
 });
 
-router.post("/submit", async (req, res) => {
-  const { candidateId, response } = req.body;
-
-  if (!userSessions[candidateId]) {
-    return res.status(400).json({ error: "Session not found or expired." });
-  }
-
-  const responseTime =
-    (Date.now() - userSessions[candidateId].startTime) / 1000;
-
-  const feedbackPrompt = `Provide a detailed analysis of the following text in terms of creativity, fluency, and adaptability:\n\n"${response}"`;
-  const feedback = await generateResponse(feedbackPrompt);
-
-  const isLLMGenerated = analyzeResponse(response);
-
-  res.json({
-    feedback,
-    responseTime,
-    flaggedAsLLMGenerated: isLLMGenerated,
-  });
-
-  delete userSessions[candidateId];
-});
-
 router.post("/finish", (req, res) => {
   const { candidateId } = req.body;
 
