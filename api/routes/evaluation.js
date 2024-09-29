@@ -12,6 +12,10 @@ const { upload } = require("../middleware/upload");
 
 let userSessions = {};
 
+router.get("/categories", (req, res) => {
+  res.json(scenarioCategories);
+});
+
 router.post("/start", async (req, res) => {
   const { candidateId, category, role } = req.body;
   if (!scenarioCategories[category]) {
