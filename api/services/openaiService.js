@@ -1,4 +1,6 @@
 const { OpenAI } = require("openai");
+const fs = require("fs");
+const path = require("path");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -39,4 +41,24 @@ async function generateResponse(prompt) {
   }
 }
 
-module.exports = { generateResponse, inferSeverityLevel };
+async function transcribe(file) {
+  try {
+    const transcription = await openai.audio.transcriptions.create({
+      file: fs.createReadStream(file.path),
+      model: "whisper-1",
+      language: "en",
+    });
+
+    return transcription.text;
+  } catch (error) {
+    console.error("Error during transcription:", error);
+    throw error;
+  } finally {
+    // Clean up the uploaded file
+    fs.unlink(file.path, (err) => {
+      if (err) console.error("Error deleting the uploaded file:", err);
+    });
+  }
+}
+
+module.exports = { generateResponse, inferSeverityLevel, transcribe };
