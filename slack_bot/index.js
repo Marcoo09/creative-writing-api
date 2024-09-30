@@ -1,7 +1,7 @@
 const { App } = require("@slack/bolt");
 require("dotenv").config();
 const { v4: uuidv4 } = require('uuid');
-const { startConversation, respond, endConversation } = require('./network');
+const { startConversation, respond, endConversation, getCategories } = require('./network');
 const { Session } = require('./models');
 
 const app = new App({
@@ -11,14 +11,18 @@ const app = new App({
   appToken: process.env.APP_TOKEN
 });
 
-app.command('/help', async ({ ack, respond }) => {
-  await ack();
-  await respond({text: "Rellenar esto"});
-});
-
 app.command('/categories', async ({ ack, respond }) => {
   await ack();
-  await respond({text: "Si"});
+
+  const categories = await getCategories();
+  let res = "";
+  for (const key in categories) {
+    if (categories.hasOwnProperty(key)) {
+      res += `${key}: ${categories[key].description}\n`;
+    }
+  }
+
+  await respond({text: res});
 });
 
 app.command('/start', async ({ command, ack, respond }) => {
